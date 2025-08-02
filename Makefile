@@ -1,5 +1,7 @@
 RPI_VERSION ?= 4
+
 BOOTMNT ?= /Users/kumamew/Documents/MiraiLinux 
+
 ARMGNU ?= aarch64-linux-gnu
 
 COPS = -DRPI_VERSION=$(RPI_VERSION) -Wall -nostdlib -nostartfiles -ffreestanding \
@@ -28,15 +30,15 @@ ASM_FILES := $(wildcard $(SRC_DIR)/*.S)
 OBJ_FILES := $(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.o)
 OBJ_FILES += $(ASM_FILES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%_s.o)
 
-DEPENDENCIE_FILE := $(OBJ_FILES:%.o=%.d)
--include $(DEPENDENCIE_FILE)
+DEP_FILES := $(OBJ_FILES:%.o=%.d)
+-include $(DEP_FILES)
 
 kernel8.img: $(SRC_DIR)/linker.ld $(OBJ_FILES)
 	@echo "Building for RPI $(value RPI_VERSION)"
 	@echo "Deploy to $(value BOOTMNT)"
+	@echo ""
 	$(ARMGNU)-ld -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf $(OBJ_FILES)
-	$(ARMGNU)-objcopy -O binary $(BUILD_DIR)/kernel8.elf kernel8.img
-
+	$(ARMGNU)-objcopy $(BUILD_DIR)/kernel8.elf -O binary kernel8.img
 ifeq ($(RPI_VERSION),4)
 	cp kernel8.img $(BOOTMNT)/kernel8-rpi4.img
 else
